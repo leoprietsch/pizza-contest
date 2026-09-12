@@ -1,7 +1,52 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Star, CheckCircle2, User, Lock } from 'lucide-react';
+import { CheckCircle2, User, Lock } from 'lucide-react';
+
+// Inline pizza SVG icon — used instead of stars in the rating widget.
+// A top-down pizza circle with three slices and two small circles for toppings.
+function PizzaIcon({
+  filled,
+  fillColor = '#E26F56',
+  outlineColor = '#2B100D',
+  className = '',
+}: {
+  filled: boolean;
+  fillColor?: string;
+  outlineColor?: string;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Pizza base circle */}
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        fill={filled ? fillColor : 'none'}
+        stroke={outlineColor}
+        strokeWidth="1.5"
+      />
+      {/* Slice divider lines */}
+      <line x1="12" y1="2" x2="12" y2="22" stroke={outlineColor} strokeWidth="1" opacity="0.5" />
+      <line x1="2.1" y1="8" x2="21.9" y2="16" stroke={outlineColor} strokeWidth="1" opacity="0.5" />
+      <line x1="2.1" y1="16" x2="21.9" y2="8" stroke={outlineColor} strokeWidth="1" opacity="0.5" />
+      {/* Toppings (small circles) — visible when filled */}
+      {filled && (
+        <>
+          <circle cx="12" cy="8" r="1.2" fill={outlineColor} opacity="0.55" />
+          <circle cx="8.5" cy="14" r="1.2" fill={outlineColor} opacity="0.55" />
+          <circle cx="15.5" cy="14" r="1.2" fill={outlineColor} opacity="0.55" />
+        </>
+      )}
+    </svg>
+  );
+}
 
 const REVIEWERS = [
   'Muri',
@@ -254,47 +299,62 @@ export default function PizzaReviewForm() {
                         {label}
                       </span>
 
-                      {/* Star Rating Bar with Half Stars */}
+                      {/* Pizza Rating Bar with Half Pizzas */}
                       <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((starIndex) => {
+                        {[1, 2, 3, 4, 5].map((pizzaIndex) => {
                           const currentRating = ratings[pair][key];
-                          const isFull = currentRating >= starIndex;
-                          const isHalf = currentRating === starIndex - 0.5;
+                          const isFull = currentRating >= pizzaIndex;
+                          const isHalf = currentRating === pizzaIndex - 0.5;
 
                           return (
                             <div
-                              key={starIndex}
+                              key={pizzaIndex}
                               className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center"
                             >
-                              <Star className="w-full h-full text-[#2B100D] fill-transparent stroke-[1.5] absolute inset-0" />
+                              {/* Outline pizza — always visible */}
+                              <PizzaIcon
+                                filled={false}
+                                outlineColor="#2B100D"
+                                className="w-full h-full absolute inset-0"
+                              />
 
+                              {/* Filled pizza overlay — clipped for half support */}
                               {(isFull || isHalf) && (
                                 <div
                                   className="absolute inset-0 overflow-hidden"
                                   style={{ width: isHalf ? '50%' : '100%' }}
                                 >
-                                  <Star className="w-7 h-7 sm:w-8 sm:h-8 fill-[#E26F56] text-[#E26F56] absolute left-0 top-0" />
+                                  <PizzaIcon
+                                    filled={true}
+                                    fillColor="#E26F56"
+                                    outlineColor="#2B100D"
+                                    className="w-7 h-7 sm:w-8 sm:h-8 absolute left-0 top-0"
+                                  />
                                 </div>
                               )}
 
+                              {/* Left half click zone → half value */}
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  handleRate(pair, key, starIndex - 0.5);
+                                  handleRate(pair, key, pizzaIndex - 0.5);
                                 }}
                                 className="absolute left-0 top-0 w-1/2 h-full z-10 cursor-pointer touch-manipulation focus:outline-none"
+                                aria-label={`Rate ${pizzaIndex - 0.5} pizza${pizzaIndex - 0.5 !== 1 ? 's' : ''}`}
                               />
 
+                              {/* Right half click zone → whole value */}
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  handleRate(pair, key, starIndex);
+                                  handleRate(pair, key, pizzaIndex);
                                 }}
                                 className="absolute right-0 top-0 w-1/2 h-full z-10 cursor-pointer touch-manipulation focus:outline-none"
+                                aria-label={`Rate ${pizzaIndex} pizza${pizzaIndex !== 1 ? 's' : ''}`}
                               />
                             </div>
                           );
