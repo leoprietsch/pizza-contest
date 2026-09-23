@@ -161,7 +161,13 @@ export default function PizzaReviewForm() {
           <h2 className="font-caveat text-4xl font-extrabold tracking-wide mb-2">
             THANK YOU!
           </h2>
-          <p className="text-lg text-[#6E2A23]">Your review has been recorded successfully.</p>
+          <p className="text-lg text-[#6E2A23] mb-6">Your review has been recorded successfully.</p>
+          <a
+            href="/results"
+            className="inline-block px-6 py-3 bg-[#8B261D] text-white font-caveat text-xl font-bold rounded-xl hover:bg-[#6E2A23] transition uppercase"
+          >
+            VIEW RESULTS
+          </a>
         </div>
       </main>
     );
