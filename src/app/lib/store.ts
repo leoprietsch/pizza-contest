@@ -1,30 +1,11 @@
-export const REVIEWER_DUO_MAP: Record<string, string> = {
-  Muri: 'Muri e Leo',
-  Leo: 'Muri e Leo',
-  Carol: 'Carol e Gabriel',
-  Gabriel: 'Carol e Gabriel',
-  Lu: 'Lu e Thiago',
-  Thiago: 'Lu e Thiago',
-  Andres: 'Andres e Nicolas',
-  Nicolas: 'Andres e Nicolas',
-  Henrique: 'Henrique e Pedro',
-  Pedro: 'Henrique e Pedro',
-};
-
-export const REVIEWERS = [
-  'Muri',
-  'Leo',
-  'Carol',
-  'Gabriel',
-  'Lu',
-  'Thiago',
-  'Andres',
-  'Nicolas',
-  'Henrique',
-  'Pedro',
+export const PIZZA_FLAVORS = [
+  'Pepperoni',
+  'Margherita',
+  'Bacon',
+  'Vegetarian',
 ] as const;
 
-export type ReviewerName = (typeof REVIEWERS)[number];
+export type PizzaFlavor = (typeof PIZZA_FLAVORS)[number];
 
 export interface CategoryRating {
   criatividade: number;
@@ -34,17 +15,17 @@ export interface CategoryRating {
 
 export interface Submission {
   id: string;
-  reviewer: ReviewerName | string;
+  flavor: PizzaFlavor | string;
   timestamp: string;
   reviews: Record<string, CategoryRating>;
 }
 
-// In-memory arrays storing submissions and distinct reviewers who have submitted
+// In-memory arrays storing submissions and distinct flavors that have submitted
 export const submissionsStore: Submission[] = [];
-export const completedReviewersStore: Set<string> = new Set();
+export const completedFlavorsStore: Set<string> = new Set();
 
 export interface DuoScoreResult {
-  duo: string;
+  flavor: string;
   criatividadeAverage: number;
   aparenciaAverage: number;
   saborAverage: number;
@@ -56,33 +37,27 @@ export function calculateLeaderboard(): {
   leaderboard: DuoScoreResult[];
   winner: DuoScoreResult | null;
 } {
-  const PAIRS = [
-    'Muri e Leo',
-    'Carol e Gabriel',
-    'Lu e Thiago',
-    'Andres e Nicolas',
-    'Henrique e Pedro',
-  ];
+  const FLAVORS = ['Pepperoni', 'Margherita', 'Bacon', 'Vegetarian'];
 
   const results: Record<string, { criatividade: number[]; aparencia: number[]; sabor: number[] }> = {};
 
-  PAIRS.forEach((pair) => {
-    results[pair] = { criatividade: [], aparencia: [], sabor: [] };
+  FLAVORS.forEach((flavor) => {
+    results[flavor] = { criatividade: [], aparencia: [], sabor: [] };
   });
 
   // Aggregate scores from all submitted reviews
   submissionsStore.forEach((sub) => {
-    Object.entries(sub.reviews).forEach(([pair, rating]) => {
-      if (results[pair]) {
-        if (rating.criatividade > 0) results[pair].criatividade.push(rating.criatividade);
-        if (rating.aparencia > 0) results[pair].aparencia.push(rating.aparencia);
-        if (rating.sabor > 0) results[pair].sabor.push(rating.sabor);
+    Object.entries(sub.reviews).forEach(([flavor, rating]) => {
+      if (results[flavor]) {
+        if (rating.criatividade > 0) results[flavor].criatividade.push(rating.criatividade);
+        if (rating.aparencia > 0) results[flavor].aparencia.push(rating.aparencia);
+        if (rating.sabor > 0) results[flavor].sabor.push(rating.sabor);
       }
     });
   });
 
-  const leaderboard: DuoScoreResult[] = PAIRS.map((pair) => {
-    const scores = results[pair];
+  const leaderboard: DuoScoreResult[] = FLAVORS.map((flavor) => {
+    const scores = results[flavor];
     const cAvg = scores.criatividade.length
       ? scores.criatividade.reduce((a, b) => a + b, 0) / scores.criatividade.length
       : 0;
@@ -96,7 +71,7 @@ export function calculateLeaderboard(): {
     const overallAvg = (cAvg + aAvg + sAvg) / 3;
 
     return {
-      duo: pair,
+      flavor,
       criatividadeAverage: Number(cAvg.toFixed(2)),
       aparenciaAverage: Number(aAvg.toFixed(2)),
       saborAverage: Number(sAvg.toFixed(2)),

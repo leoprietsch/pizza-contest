@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CheckCircle2, User, Lock } from 'lucide-react';
+import { CheckCircle2, Pizza, Lock } from 'lucide-react';
 
 // Inline pizza SVG icon — used instead of stars in the rating widget.
 // A top-down pizza circle with three slices and two small circles for toppings.
@@ -48,57 +48,25 @@ function PizzaIcon({
   );
 }
 
-const REVIEWERS = [
-  'Muri',
-  'Leo',
-  'Carol',
-  'Gabriel',
-  'Lu',
-  'Thiago',
-  'Andres',
-  'Nicolas',
-  'Henrique',
-  'Pedro',
-];
-
-const REVIEWER_DUO_MAP: Record<string, string> = {
-  Muri: 'Muri e Leo',
-  Leo: 'Muri e Leo',
-  Carol: 'Carol e Gabriel',
-  Gabriel: 'Carol e Gabriel',
-  Lu: 'Lu e Thiago',
-  Thiago: 'Lu e Thiago',
-  Andres: 'Andres e Nicolas',
-  Nicolas: 'Andres e Nicolas',
-  Henrique: 'Henrique e Pedro',
-  Pedro: 'Henrique e Pedro',
-};
-
-const PAIRS = [
-  'Muri e Leo',
-  'Carol e Gabriel',
-  'Lu e Thiago',
-  'Andres e Nicolas',
-  'Henrique e Pedro',
-];
+const FLAVORS = ['Pepperoni', 'Margherita', 'Bacon', 'Vegetarian'];
 
 const CRITERIA = [
-  { key: 'criatividade', label: 'CRIATIVIDADE' },
-  { key: 'aparencia', label: 'APARÊNCIA' },
-  { key: 'sabor', label: 'SABOR' },
+  { key: 'criatividade', label: 'CREATIVITY' },
+  { key: 'aparencia', label: 'APPEARANCE' },
+  { key: 'sabor', label: 'TASTE' },
 ] as const;
 
 type CategoryKey = (typeof CRITERIA)[number]['key'];
 
 export default function PizzaReviewForm() {
-  const [selectedReviewer, setSelectedReviewer] = useState<string>('');
-  const [completedReviewers, setCompletedReviewers] = useState<string[]>([]);
+  const [selectedFlavor, setSelectedFlavor] = useState<string>('');
+  const [completedFlavors, setCompletedFlavors] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const [ratings, setRatings] = useState<Record<string, Record<CategoryKey, number>>>(() =>
-    PAIRS.reduce((acc, pair) => {
-      acc[pair] = { criatividade: 0, aparencia: 0, sabor: 0 };
+    FLAVORS.reduce((acc, flavor) => {
+      acc[flavor] = { criatividade: 0, aparencia: 0, sabor: 0 };
       return acc;
     }, {} as Record<string, Record<CategoryKey, number>>)
   );
@@ -106,55 +74,51 @@ export default function PizzaReviewForm() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Sync completed reviewers list from server memory on load
-  const fetchCompletedReviewers = async () => {
+  // Sync completed flavors list from server memory on load
+  const fetchCompletedFlavors = async () => {
     try {
       const res = await fetch('/api/reviews');
       const data = await res.json();
-      if (data.completedReviewers) {
-        setCompletedReviewers(data.completedReviewers);
+      if (data.completedFlavors) {
+        setCompletedFlavors(data.completedFlavors);
       }
     } catch (err) {
-      console.error('Erro ao buscar avaliadores concluídos', err);
+      console.error('Error fetching completed flavors', err);
     }
   };
 
   useEffect(() => {
-    fetchCompletedReviewers();
+    fetchCompletedFlavors();
   }, []);
 
-  const handleRate = (pair: string, category: CategoryKey, value: number) => {
+  const handleRate = (flavor: string, category: CategoryKey, value: number) => {
     setRatings((prev) => ({
       ...prev,
-      [pair]: {
-        ...prev[pair],
+      [flavor]: {
+        ...prev[flavor],
         [category]: value,
       },
     }));
   };
 
-  const handleSelectReviewer = (name: string) => {
-    if (completedReviewers.includes(name)) return;
-    setSelectedReviewer(name);
+  const handleSelectFlavor = (flavor: string) => {
+    if (completedFlavors.includes(flavor)) return;
+    setSelectedFlavor(flavor);
     setIsModalOpen(false);
     setErrorMessage('');
   };
 
-  // -------------------------------------------------------------
-  // Form Validation: Returns true if any active (non-self) duo has
+  // Form Validation: Returns true if any active (non-own) flavor has
   // at least one category left with 0 stars.
-  // -------------------------------------------------------------
-  const ownDuo = selectedReviewer ? REVIEWER_DUO_MAP[selectedReviewer] : null;
-
   const isFormInvalid =
-    !selectedReviewer ||
-    PAIRS.some((pair) => {
-      if (pair === ownDuo) return false; // Skip the reviewer's own duo
-      const pairRatings = ratings[pair];
+    !selectedFlavor ||
+    FLAVORS.some((flavor) => {
+      if (flavor === selectedFlavor) return false; // Skip the user's own flavor
+      const flavorRatings = ratings[flavor];
       return (
-        pairRatings.criatividade === 0 ||
-        pairRatings.aparencia === 0 ||
-        pairRatings.sabor === 0
+        flavorRatings.criatividade === 0 ||
+        flavorRatings.aparencia === 0 ||
+        flavorRatings.sabor === 0
       );
     });
 
@@ -170,20 +134,20 @@ export default function PizzaReviewForm() {
       const response = await fetch('/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reviewer: selectedReviewer, reviews: ratings }),
+        body: JSON.stringify({ flavor: selectedFlavor, reviews: ratings }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setErrorMessage(data.error || 'Erro ao enviar avaliação.');
-        fetchCompletedReviewers();
+        setErrorMessage(data.error || 'Error submitting review.');
+        fetchCompletedFlavors();
         setIsModalOpen(true);
       } else {
         setSubmitted(true);
       }
     } catch (err) {
-      setErrorMessage('Falha ao enviar avaliação. Tente novamente.');
+      setErrorMessage('Failed to submit review. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -195,9 +159,9 @@ export default function PizzaReviewForm() {
         <div className="bg-[#FFFDF9] border-2 border-[#8B261D] rounded-2xl p-8 max-w-md w-full text-center shadow-lg">
           <CheckCircle2 className="w-16 h-16 text-[#8B261D] mx-auto mb-4" />
           <h2 className="font-caveat text-4xl font-extrabold tracking-wide mb-2">
-            OBRIGADO, {selectedReviewer.toUpperCase()}!
+            THANK YOU, {selectedFlavor.toUpperCase()}!
           </h2>
-          <p className="text-lg text-[#6E2A23]">Sua avaliação foi registrada com sucesso.</p>
+          <p className="text-lg text-[#6E2A23]">Your review has been recorded successfully.</p>
         </div>
       </main>
     );
@@ -206,16 +170,16 @@ export default function PizzaReviewForm() {
   return (
     <main className="min-h-screen bg-[#FDFBF7] py-8 px-4 flex justify-center text-[#4A1D18] relative">
       
-      {/* Identity Selection Modal */}
+      {/* Flavor Selection Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#FFFDF9] border-2 border-[#8B261D] rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center">
-            <User className="w-12 h-12 text-[#8B261D] mx-auto mb-2" />
+            <Pizza className="w-12 h-12 text-[#8B261D] mx-auto mb-2" />
             <h2 className="font-caveat text-4xl font-extrabold text-[#8B261D] mb-1">
-              QUEM É VOCÊ?
+              WHICH FLAVOR DID YOU MAKE?
             </h2>
             <p className="text-sm text-[#6E2A23] mb-6 font-semibold">
-              Selecione seu nome para iniciar a avaliação.
+              Select your pizza flavor to begin rating.
             </p>
 
             {errorMessage && (
@@ -225,23 +189,23 @@ export default function PizzaReviewForm() {
             )}
 
             <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
-              {REVIEWERS.map((name) => {
-                const isDone = completedReviewers.includes(name);
+              {FLAVORS.map((flavor) => {
+                const isDone = completedFlavors.includes(flavor);
                 return (
                   <button
-                    key={name}
+                    key={flavor}
                     type="button"
                     disabled={isDone}
-                    onClick={() => handleSelectReviewer(name)}
+                    onClick={() => handleSelectFlavor(flavor)}
                     className={`py-3 px-4 rounded-xl font-caveat text-2xl font-bold border-2 transition-all flex items-center justify-center gap-2 ${
                       isDone
                         ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed opacity-60'
-                        : selectedReviewer === name
+                        : selectedFlavor === flavor
                         ? 'bg-[#8B261D] text-white border-[#8B261D]'
                         : 'border-[#E8D2C9] text-[#2B100D] hover:border-[#8B261D]'
                     }`}
                   >
-                    {name}
+                    {flavor}
                     {isDone && <Lock className="w-4 h-4 text-gray-400" />}
                   </button>
                 );
@@ -257,37 +221,37 @@ export default function PizzaReviewForm() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="font-caveat text-4xl sm:text-5xl font-black tracking-widest text-[#8B261D] uppercase">
-            AVALIAÇÃO
+            RATE THE PIZZAS
           </h1>
-          {selectedReviewer && (
+          {selectedFlavor && (
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
               className="mt-2 text-sm text-[#8B261D] underline font-semibold block mx-auto"
             >
-              Avaliando como: <strong>{selectedReviewer}</strong> (Alterar)
+              Rating as: <strong>{selectedFlavor}</strong> (Change)
             </button>
           )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {PAIRS.map((pair) => {
-            const isOwnDuo = selectedReviewer && REVIEWER_DUO_MAP[selectedReviewer] === pair;
+          {FLAVORS.map((flavor) => {
+            const isOwnFlavor = selectedFlavor === flavor;
 
             return (
               <div
-                key={pair}
+                key={flavor}
                 className={`text-center space-y-3 pb-6 border-b border-[#E8D2C9] last:border-b-0 ${
-                  isOwnDuo ? 'opacity-50 pointer-events-none' : ''
+                  isOwnFlavor ? 'opacity-50 pointer-events-none' : ''
                 }`}
               >
                 <h2 className="font-caveat text-xl sm:text-2xl font-black tracking-wider uppercase text-[#2B100D]">
-                  {pair}
+                  {flavor}
                 </h2>
 
-                {isOwnDuo ? (
+                {isOwnFlavor ? (
                   <p className="font-caveat text-lg text-[#8B261D] italic font-bold">
-                    (Sua dupla - avaliação bloqueada)
+                    (Your flavor - rating blocked)
                   </p>
                 ) : (
                   CRITERIA.map(({ key, label }) => (
@@ -302,7 +266,7 @@ export default function PizzaReviewForm() {
                       {/* Pizza Rating Bar with Half Pizzas */}
                       <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((pizzaIndex) => {
-                          const currentRating = ratings[pair][key];
+                          const currentRating = ratings[flavor][key];
                           const isFull = currentRating >= pizzaIndex;
                           const isHalf = currentRating === pizzaIndex - 0.5;
 
@@ -339,7 +303,7 @@ export default function PizzaReviewForm() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  handleRate(pair, key, pizzaIndex - 0.5);
+                                  handleRate(flavor, key, pizzaIndex - 0.5);
                                 }}
                                 className="absolute left-0 top-0 w-1/2 h-full z-10 cursor-pointer touch-manipulation focus:outline-none"
                                 aria-label={`Rate ${pizzaIndex - 0.5} pizza${pizzaIndex - 0.5 !== 1 ? 's' : ''}`}
@@ -351,7 +315,7 @@ export default function PizzaReviewForm() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  handleRate(pair, key, pizzaIndex);
+                                  handleRate(flavor, key, pizzaIndex);
                                 }}
                                 className="absolute right-0 top-0 w-1/2 h-full z-10 cursor-pointer touch-manipulation focus:outline-none"
                                 aria-label={`Rate ${pizzaIndex} pizza${pizzaIndex !== 1 ? 's' : ''}`}
@@ -367,12 +331,17 @@ export default function PizzaReviewForm() {
             );
           })}
 
+          {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting || isFormInvalid}
-            className="w-full py-4 bg-[#8B261D] hover:bg-[#6E2A23] text-[#FFFDF9] font-black text-lg tracking-widest rounded-xl transition duration-200 shadow-md uppercase disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled={isFormInvalid || isSubmitting}
+            className={`w-full py-4 rounded-xl font-caveat text-2xl font-bold tracking-wide uppercase transition-all ${
+              isFormInvalid || isSubmitting
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-[#8B261D] text-white hover:bg-[#6E2A23]'
+            }`}
           >
-            {isSubmitting ? 'ENVIANDO...' : 'ENVIAR AVALIAÇÃO'}
+            {isSubmitting ? 'SUBMITTING...' : 'SUBMIT REVIEW'}
           </button>
         </form>
       </div>

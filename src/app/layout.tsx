@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Pizza Review",
-  description: "O webapp de avaliações das Pizzas.",
+  description: "Pizza contest rating app.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

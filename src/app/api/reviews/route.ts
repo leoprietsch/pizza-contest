@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import {
   submissionsStore,
-  completedReviewersStore,
-  REVIEWER_DUO_MAP,
+  completedFlavorsStore,
   CategoryRating,
 } from '../../lib/store';
 
-// GET: Fetch list of reviewers who have already submitted
+// GET: Fetch list of flavors that have already submitted
 export async function GET() {
   return NextResponse.json({
-    completedReviewers: Array.from(completedReviewersStore),
+    completedFlavors: Array.from(completedFlavorsStore),
   });
 }
 
@@ -17,48 +16,56 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { reviewer, reviews } = body as {
-      reviewer: string;
+    const { flavor, reviews } = body as {
+      flavor: string;
       reviews: Record<string, CategoryRating>;
     };
 
-    if (!reviewer) {
+    if (!flavor) {
       return NextResponse.json(
-        { error: 'Identificação do avaliador é obrigatória.' },
+        { error: 'Pizza flavor selection is required.' },
         { status: 400 }
       );
     }
 
-    // Server-side check 1: Has this reviewer already submitted?
-    if (completedReviewersStore.has(reviewer)) {
+    // Server-side check 1: Is this a valid flavor?
+    const VALID_FLAVORS = ['Pepperoni', 'Margherita', 'Bacon', 'Vegetarian'];
+    if (!VALID_FLAVORS.includes(flavor)) {
       return NextResponse.json(
-        { error: `O avaliador ${reviewer} já enviou uma avaliação!` },
+        { error: 'Invalid pizza flavor.' },
+        { status: 400 }
+      );
+    }
+
+    // Server-side check 2: Has this flavor already submitted?
+    if (completedFlavorsStore.has(flavor)) {
+      return NextResponse.json(
+        { error: `The ${flavor} pizza has already been submitted!` },
         { status: 403 }
       );
     }
 
-    // Server-side check 2: Prevent voting on own duo by stripping it from payload
-    const ownDuo = REVIEWER_DUO_MAP[reviewer];
+    // Server-side check 3: Prevent voting on own flavor by stripping it from payload
     const sanitizedReviews = { ...reviews };
-    if (ownDuo && sanitizedReviews[ownDuo]) {
-      delete sanitizedReviews[ownDuo];
+    if (sanitizedReviews[flavor]) {
+      delete sanitizedReviews[flavor];
     }
 
     // Store in memory on the server
     const newSubmission = {
       id: Math.random().toString(36).substring(2, 9),
-      reviewer,
+      flavor,
       timestamp: new Date().toISOString(),
       reviews: sanitizedReviews,
     };
 
     submissionsStore.push(newSubmission);
-    completedReviewersStore.add(reviewer);
+    completedFlavorsStore.add(flavor);
 
     return NextResponse.json({ success: true, submission: newSubmission });
   } catch (error) {
     return NextResponse.json(
-      { error: 'Erro ao salvar avaliação no servidor.' },
+      { error: 'Error saving review on server.' },
       { status: 500 }
     );
   }
