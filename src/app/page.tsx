@@ -221,7 +221,7 @@ export default function PizzaReviewForm() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="font-caveat text-4xl sm:text-5xl font-black tracking-widest text-[#8B261D] uppercase">
-            RATE THE PIZZAS
+            PIZZA REVIEW
           </h1>
           {selectedFlavor && (
             <button
