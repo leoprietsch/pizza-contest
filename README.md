@@ -1,6 +1,10 @@
 # Pizza Contest 🍕
 
+**[🚀 Live Demo](https://pizza-contest-xi.vercel.app/)**
+
 A collaborative pizza rating application built with modern web technologies. Collect blind taste test reviews across multiple pizza flavors, track submission progress, and reveal the winner with comprehensive scoring analytics.
+
+> 🤖 **Developed using AI-First Approach with Spec-Driven Development methodology**
 
 ## Overview
 
@@ -101,6 +105,15 @@ This project demonstrates:
 - Responsive UI design with Tailwind CSS
 - Clean code organization and separation of concerns
 - Attention to UX details (modal flows, loading states, accessibility)
+
+### Development Methodology
+
+This project was developed using **Spec-Driven Development** with an **AI-First approach**:
+- Requirements were formalized into testable EARS-notation acceptance criteria
+- Features were designed with architectural clarity before implementation
+- Atomic, focused tasks ensured clean git history (one commit per task)
+- Verification gates validated each implementation against the specification
+- This approach enabled rapid, high-quality feature delivery with minimal rework
 
 ---
 
