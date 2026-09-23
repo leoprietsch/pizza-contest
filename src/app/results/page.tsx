@@ -61,7 +61,7 @@ export default function AdminDashboard() {
         <div className="bg-[#FFFDF9] border-2 border-[#8B261D] rounded-2xl p-6 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h1 className="font-caveat text-4xl sm:text-5xl font-black text-[#8B261D]">
-              VOTE TALLY
+              PIZZA REVIEW
             </h1>
             <p className="text-sm text-[#6E2A23] font-medium mt-1">
               Track who has voted and reveal the winning pizza flavor!
