@@ -3,51 +3,6 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle2, Pizza, Lock } from 'lucide-react';
 
-// Inline pizza SVG icon — used instead of stars in the rating widget.
-// A top-down pizza circle with three slices and two small circles for toppings.
-function PizzaIcon({
-  filled,
-  fillColor = '#E26F56',
-  outlineColor = '#2B100D',
-  className = '',
-}: {
-  filled: boolean;
-  fillColor?: string;
-  outlineColor?: string;
-  className?: string;
-}) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Pizza base circle */}
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        fill={filled ? fillColor : 'none'}
-        stroke={outlineColor}
-        strokeWidth="1.5"
-      />
-      {/* Slice divider lines */}
-      <line x1="12" y1="2" x2="12" y2="22" stroke={outlineColor} strokeWidth="1" opacity="0.5" />
-      <line x1="2.1" y1="8" x2="21.9" y2="16" stroke={outlineColor} strokeWidth="1" opacity="0.5" />
-      <line x1="2.1" y1="16" x2="21.9" y2="8" stroke={outlineColor} strokeWidth="1" opacity="0.5" />
-      {/* Toppings (small circles) — visible when filled */}
-      {filled && (
-        <>
-          <circle cx="12" cy="8" r="1.2" fill={outlineColor} opacity="0.55" />
-          <circle cx="8.5" cy="14" r="1.2" fill={outlineColor} opacity="0.55" />
-          <circle cx="15.5" cy="14" r="1.2" fill={outlineColor} opacity="0.55" />
-        </>
-      )}
-    </svg>
-  );
-}
-
 const FLAVORS = ['Pepperoni', 'Margherita', 'Bacon', 'Vegetarian'];
 
 const CRITERIA = [
@@ -269,7 +224,7 @@ export default function PizzaReviewForm() {
                         {label}
                       </span>
 
-                      {/* Pizza Rating Bar with Half Pizzas */}
+                      {/* Pizza Rating Bar with Emoji */}
                       <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((pizzaIndex) => {
                           const currentRating = ratings[flavor][key];
@@ -281,26 +236,23 @@ export default function PizzaReviewForm() {
                               key={pizzaIndex}
                               className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center"
                             >
-                              {/* Outline pizza — always visible */}
-                              <PizzaIcon
-                                filled={false}
-                                outlineColor="#2B100D"
-                                className="w-full h-full absolute inset-0"
-                              />
+                              {/* Outline emoji — always visible */}
+                              <span
+                                className="text-2xl absolute inset-0 flex items-center justify-center opacity-30"
+                                aria-hidden="true"
+                              >
+                                🍕
+                              </span>
 
-                              {/* Filled pizza overlay — clipped for half support */}
+                              {/* Filled emoji — with opacity for half support */}
                               {(isFull || isHalf) && (
-                                <div
-                                  className="absolute inset-0 overflow-hidden"
-                                  style={{ width: isHalf ? '50%' : '100%' }}
+                                <span
+                                  className="text-2xl absolute inset-0 flex items-center justify-center"
+                                  style={{ opacity: isHalf ? 0.6 : 1 }}
+                                  aria-hidden="true"
                                 >
-                                  <PizzaIcon
-                                    filled={true}
-                                    fillColor="#E26F56"
-                                    outlineColor="#2B100D"
-                                    className="w-7 h-7 sm:w-8 sm:h-8 absolute left-0 top-0"
-                                  />
-                                </div>
+                                  🍕
+                                </span>
                               )}
 
                               {/* Left half click zone → half value */}
