@@ -159,7 +159,7 @@ export default function PizzaReviewForm() {
         <div className="bg-[#FFFDF9] border-2 border-[#8B261D] rounded-2xl p-8 max-w-md w-full text-center shadow-lg">
           <CheckCircle2 className="w-16 h-16 text-[#8B261D] mx-auto mb-4" />
           <h2 className="font-caveat text-4xl font-extrabold tracking-wide mb-2">
-            THANK YOU, {selectedFlavor.toUpperCase()}!
+            THANK YOU!
           </h2>
           <p className="text-lg text-[#6E2A23]">Your review has been recorded successfully.</p>
         </div>
