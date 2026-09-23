@@ -2,13 +2,10 @@
 
 **[🚀 Live Demo](https://pizza-contest-xi.vercel.app/)**
 
-A collaborative pizza rating application built with modern web technologies. Collect blind taste test reviews across multiple pizza flavors, track submission progress, and reveal the winner with comprehensive scoring analytics.
+A pizza rating application built with Nextjs/React, TypeScript. Collect blind taste test reviews across pizza flavors, track submission progress, and reveal the winners when voting is done.
 
 > 🤖 **Developed using AI-First Approach with Spec-Driven Development methodology**
 
-## Overview
-
-Pizza Contest is a full-stack Next.js application designed to manage competitive pizza reviews. Users can submit blind ratings across three criteria (creativity, appearance, taste), while admins get real-time dashboard visibility into submission progress and final rankings.
 
 ### Key Features
 
@@ -21,36 +18,11 @@ Pizza Contest is a full-stack Next.js application designed to manage competitive
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 with TypeScript
+- **Framework:** Next.js/React, using TypeScript
 - **Styling:** Tailwind CSS + custom Caveat font
 - **State Management:** React hooks + in-memory store
 - **UI Components:** Lucide icons
 - **Tooling:** ESLint, TypeScript
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+ 
-- npm, yarn, pnpm, or bun
-
-### Installation & Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to access the application.
-
-### Production Build
-
-```bash
-npm run build
-npm start
-```
 
 ## Project Structure
 
@@ -68,7 +40,7 @@ src/app/
 ## How It Works
 
 ### Participant Flow
-1. Select their pizza flavor
+1. Select their own pizza flavor
 2. Rate all other flavors across three criteria
 3. Submit anonymous review (stored server-side)
 
@@ -96,9 +68,9 @@ The project uses Next.js API routes for backend logic and React hooks for state 
 - `AdminDashboard` – Leaderboard and submission tracker
 - `calculateLeaderboard()` – Core scoring and ranking logic
 
-## Notes for Reviewers
+## Notes
 
-This project demonstrates:
+This project has:
 - Modern React patterns (hooks, client components)
 - TypeScript for type safety
 - Next.js full-stack capabilities (API routes + pages)
@@ -110,7 +82,6 @@ This project demonstrates:
 
 This project was developed using **Spec-Driven Development** with an **AI-First approach**:
 - Requirements were formalized into testable EARS-notation acceptance criteria
-- Features were designed with architectural clarity before implementation
 - Atomic, focused tasks ensured clean git history (one commit per task)
 - Verification gates validated each implementation against the specification
 - This approach enabled rapid, high-quality feature delivery with minimal rework
